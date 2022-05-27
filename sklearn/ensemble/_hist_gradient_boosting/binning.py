@@ -165,7 +165,7 @@ class _BinMapper(TransformerMixin, BaseEstimator):
         self.random_state = random_state
         self.n_threads = n_threads
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, bin_thresholds=None):
         """Fit data X by computing the binning thresholds.
 
         The last bin is reserved for missing values, whether missing values
@@ -229,7 +229,10 @@ class _BinMapper(TransformerMixin, BaseEstimator):
 
         for f_idx in range(n_features):
             if not self.is_categorical_[f_idx]:
-                thresholds = _find_binning_thresholds(X[:, f_idx], max_bins)
+                if bin_thresholds is None:
+                    thresholds = _find_binning_thresholds(X[:, f_idx], max_bins)
+                else:
+                    thresholds = bin_thresholds[f_idx]
                 n_bins_non_missing.append(thresholds.shape[0] + 1)
             else:
                 # Since categories are assumed to be encoded in

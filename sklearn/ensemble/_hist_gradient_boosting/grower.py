@@ -406,7 +406,7 @@ class TreeGrower:
         )
         self._compute_best_split_and_push(self.root)
 
-    def _compute_best_split_and_push(self, node):
+    def _compute_best_split_and_push(self, node, n_samples=None, histograms=None):
         """Compute the best possible split (SplitInfo) of a given node.
 
         Also push it in the heap of splittable nodes if gain isn't zero.
@@ -415,15 +415,26 @@ class TreeGrower:
         (min_hessians_to_split, min_gain_to_split, min_samples_leaf)
         """
 
-        node.split_info = self.splitter.find_node_split(
-            node.n_samples,
-            node.histograms,
-            node.sum_gradients,
-            node.sum_hessians,
-            node.value,
-            node.children_lower_bound,
-            node.children_upper_bound,
-        )
+        if n_samples is None or histograms is None:
+            node.split_info = self.splitter.find_node_split(
+                node.n_samples,
+                node.histograms,
+                node.sum_gradients,
+                node.sum_hessians,
+                node.value,
+                node.children_lower_bound,
+                node.children_upper_bound,
+            )
+        else:
+            node.split_info = self.splitter.find_node_split(
+                n_samples,
+                histograms,
+                node.sum_gradients,
+                node.sum_hessians,
+                node.value,
+                node.children_lower_bound,
+                node.children_upper_bound,
+            )
 
         if node.split_info.gain <= 0:  # no valid split
             self._finalize_leaf(node)
